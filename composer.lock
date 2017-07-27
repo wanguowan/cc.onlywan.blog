@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "96098e473b028cdb2529580554a1ae3e",
+    "content-hash": "c9570a4f2b644fe658eabddc779e9366",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -631,6 +631,38 @@
                 "schedule"
             ],
             "time": "2017-01-23T04:29:33+00:00"
+        },
+        {
+            "name": "naux/auto-correct",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/NauxLiu/auto-correct.git",
+                "reference": "eb05777b4bc4019c776bf81983ae46c35e597929"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/NauxLiu/auto-correct/zipball/eb05777b4bc4019c776bf81983ae46c35e597929",
+                "reference": "eb05777b4bc4019c776bf81983ae46c35e597929",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Naux\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "NauxLiu",
+                    "email": "nauxliu@gmail.com"
+                }
+            ],
+            "time": "2015-11-27T03:39:36+00:00"
         },
         {
             "name": "nesbot/carbon",

@@ -9,6 +9,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\CLibs\CXmlRpcLib;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Cores\Creator\BlogCreator;
+use App\Http\Models\DB\Blogs;
 use App\Http\Models\DB\Categorys;
 use Illuminate\Http\Request;
 use Log;
@@ -20,9 +22,9 @@ class MetaWeblogApiController extends Controller
         $arrMethods = array(
             'blogger.getUsersBlogs' => '_getUserBlogList',
 //            'blogger.deletePost' => 'deletePost',
-//            'metaWeblog.newPost' => 'newPost',
+            'metaWeblog.newPost' => '_newPost',
 //            'metaWeblog.editPost' => 'editPost',
-//            'metaWeblog.getPost' => 'getPost',
+//            'metaWeblog.getPost' => '_getPost',
             'metaWeblog.getCategories' => '_getCategories',
 //            'metaWeblog.newMediaObject' => 'newMediaObject',
 //            'metaWeblog.getRecentPosts' => 'getRecentPosts',
@@ -31,6 +33,7 @@ class MetaWeblogApiController extends Controller
 
         $sMethod = null;
         $sReqContent = $request->getContent();
+        Log::info( $sReqContent );
         $arrResponse = xmlrpc_decode_request( $sReqContent, $sMethod );
         if ( array_key_exists( $sMethod, $arrMethods ) )
         {
@@ -53,20 +56,54 @@ class MetaWeblogApiController extends Controller
         CXmlRpcLib::response( $arrResponse );
     }
 
-    public function newPost($method, $arrParams )
+    private function _newPost($method, $arrParams )
     {
         list( $nBlogID, $sUserName, $sPassword, $arrStructure, $sPublish ) = $arrParams;
-        Log::info( $arrStructure );
         $request = $this->_transform( $arrStructure );
-//        app(\Persimmon\Creator\PostsCreator::class)->create($this, $request);
+
+        $oBlogCreator = new BlogCreator();
+        $nID = $oBlogCreator->create( $request );
+
+        if ( $nID )
+        {
+            CXmlRpcLib::response( $nID );
+        }
+        else
+        {
+            $response = [
+                'faultCode' => '2',
+                'faultString' => '创建失败',
+            ];
+            CXmlRpcLib::response( $response, 'error' );
+        }
     }
 
-    private function _editPost( $sMethod, $sParams )
+    /**
+     * Get Post
+     * @param $method
+     * @param $params
+     */
+    public function _getPost( $sMethod, $arrParams )
     {
-        list( $nPostId, $sUserName, $sPassword, $sStructure, $publish ) = $sParams;
-        $request = $this->_transform( $sStructure );
+        list( $nPostID, $sUserName, $sPassword ) = $arrParams;
+        $data = [];
+        $post = Blogs::where('id', $nPostID)->select('id', 'id as postid', 'title', 'category_id', 'markdown as description', 'user_id as userid', 'flag as wp_slug', 'created_at as dateCreated')->first();
+        $data = $post->toArray();
+        $tags = $post->tags->toArray();
+        $data['categories'] = $post->categories->category_name;
+        $data['link'] = route('posts', [$post->wp_slug]);
+        $tags = array_map(function ($item) {
+            return $item['tags_name'];
+        }, $tags);
+        $data['mt_keywords'] = implode(',', $tags);
+        unset($post, $tags);
+        XmlRpc::response($data);
+    }
 
-        Log::info( $request );
+    private function _editPost( $sMethod, $arrParams )
+    {
+        list( $nPostId, $sUserName, $sPassword, $arrStructure, $publish ) = $arrParams;
+        $request = $this->_transform( $arrStructure );
     }
 
     private function _getCategories( $sMethod, $sParams )
@@ -95,14 +132,13 @@ class MetaWeblogApiController extends Controller
     private function _transform( $arrStructure )
     {
         $tags = strpos( $arrStructure[ 'mt_keywords' ], ',') !== false ? explode(',', $arrStructure[ 'mt_keywords' ] ) : $arrStructure['mt_keywords'];
-        $category = Categorys::where('cat_name', $arrStructure['$arrStructure'][0])->select('id')->first();
+        $category = Categorys::where('cat_name', $arrStructure['categories'][0])->select('id')->first();
         $request = new Request();
         $request->title = $arrStructure['title'];
         $request->flag = $arrStructure['wp_slug'];
         $request->thumb = '';
         $request->tags = is_array( $arrStructure[ 'mt_keywords' ] ) ? $arrStructure[ 'mt_keywords' ] : $tags;
         $request->category_id = $category->id;
-        $request->category_id = 1;
 //        $request->user_id = Auth::id();
         $request->user_id = 1;
         $request->markdown = $arrStructure[ 'description' ];
