@@ -8,6 +8,7 @@
 namespace App\Http\Models\Cores\Creator;
 
 use App\Http\Models\DB\Blogs;
+use App\Http\Models\DB\Tags;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Naux\AutoCorrect;
@@ -26,6 +27,7 @@ class BlogCreator
             // TODO 添加错误
             return null;
         }
+        Tags::createBlogsTags( $oBlog->id, $request->tags );
 
         return $oBlog->id;
     }

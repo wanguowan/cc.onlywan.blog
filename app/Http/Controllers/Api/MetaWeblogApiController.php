@@ -24,7 +24,7 @@ class MetaWeblogApiController extends Controller
 //            'blogger.deletePost' => 'deletePost',
             'metaWeblog.newPost' => '_newPost',
 //            'metaWeblog.editPost' => 'editPost',
-//            'metaWeblog.getPost' => '_getPost',
+            'metaWeblog.getPost' => '_getPost',
             'metaWeblog.getCategories' => '_getCategories',
 //            'metaWeblog.newMediaObject' => 'newMediaObject',
 //            'metaWeblog.getRecentPosts' => 'getRecentPosts',
@@ -83,21 +83,25 @@ class MetaWeblogApiController extends Controller
      * @param $method
      * @param $params
      */
-    public function _getPost( $sMethod, $arrParams )
+    private function _getPost( $sMethod, $arrParams )
     {
         list( $nPostID, $sUserName, $sPassword ) = $arrParams;
-        $data = [];
-        $post = Blogs::where('id', $nPostID)->select('id', 'id as postid', 'title', 'category_id', 'markdown as description', 'user_id as userid', 'flag as wp_slug', 'created_at as dateCreated')->first();
-        $data = $post->toArray();
-        $tags = $post->tags->toArray();
-        $data['categories'] = $post->categories->category_name;
-        $data['link'] = route('posts', [$post->wp_slug]);
-        $tags = array_map(function ($item) {
-            return $item['tags_name'];
-        }, $tags);
-        $data['mt_keywords'] = implode(',', $tags);
-        unset($post, $tags);
-        XmlRpc::response($data);
+        $arrBlog = [];
+        $oBlog = Blogs::where('id', $nPostID)->select('id', 'id as postid', 'b_title as title', 'b_cat_id as category_id',
+            'b_cat_id', 'b_md as description', 'user_id as userid', 'b_flag as wp_slug', 'created_at as dateCreated')->first();
+        $arrBlog = $oBlog->toArray();
+        $arrTags = $oBlog->tags->toArray();
+        $arrBlog[ 'categories' ] = $oBlog->categories->cat_name;
+//        $arrBlog[ 'link' ] = route( 'posts', [ $oBlog->wp_slug ] );
+        $arrTagNames = array_map( function ( $item ) {
+            return $item[ 'tags_name' ];
+        }, $arrTags );
+        $arrBlog[ 'mt_keywords' ] = implode( ',', $arrTagNames );
+
+        //  该字段返回后，mweb会崩溃，后面处理
+        unset( $arrBlog[ 'categories' ] );
+
+        CXmlRpcLib::response( $arrBlog );
     }
 
     private function _editPost( $sMethod, $arrParams )

@@ -112,24 +112,24 @@ class CXmlRpcLib
             }
         } else { #经典实例
             if (!$type) {
-                /*
-                if(is_int($data)){
-                    $returnvalue['int'] = $data;
-                    return $returnvalue;
-                }elseif(is_float($data)){
-                    $returnvalue['double'] = $data;
-                    return $returnvalue;
-                }elseif(is_bool($data)){
-                    $returnvalue['boolean'] = ($data ? 1 : 0);
-                    return $returnvalue;
-                }elseif(preg_match('/^\d{8}T\d{2}:\d{2}:\d{2}$/', $data, $matches)){ #it's a date
-                    $returnvalue['dateTime.iso8601'] = $data;
-                    return $returnvalue;
-                }elseif(is_string($data)){
-                    $returnvalue['string'] = htmlspecialchars($data);
-                    return $returnvalue;
-                }
-                */
+
+//                if(is_int($data)){
+//                    $returnvalue['int'] = $data;
+//                    return $returnvalue;
+//                }elseif(is_float($data)){
+//                    $returnvalue['double'] = $data;
+//                    return $returnvalue;
+//                }elseif(is_bool($data)){
+//                    $returnvalue['boolean'] = ($data ? 1 : 0);
+//                    return $returnvalue;
+//                }elseif(preg_match('/^\d{8}T\d{2}:\d{2}:\d{2}$/', $data, $matches)){ #it's a date
+//                    $returnvalue['dateTime.iso8601'] = $data;
+//                    return $returnvalue;
+//                }elseif(is_string($data)){
+//                    $returnvalue['string'] = htmlspecialchars($data);
+//                    return $returnvalue;
+//                }
+
                 return $data;
             } else {
                 $returnvalue[$type] = htmlspecialchars($data);
